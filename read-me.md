@@ -939,4 +939,160 @@ Dell OptiPlex 5050
                 └── Retenção de 14 dias
 ```
 
+## Acesso pela internet e firewall
+
+Por enquanto, mantenha os serviços acessíveis apenas pela rede local. Se precisar configurar acesso pela internet, consulte a [documentação original sobre firewall](https://chatgpt.com/share/6a8cd4fb-6338-83ea-a42f-6cf9ca409eee) e configure também o roteador e as regras de segurança necessárias.
+
+> **Atenção:** não exponha diretamente à internet as portas do PostgreSQL (`5432`), pgAdmin (`5050`) ou a porta de desenvolvimento do Next.js (`3000`). O Portainer (`9443`) também deve ser protegido antes de qualquer acesso externo.
+
+## Preparar o ambiente de projetos
+
+### Criar a pasta de projetos
+
+No Ubuntu Server, execute:
+
+```bash
+mkdir -p ~/projetos
+cd ~/projetos
+pwd
+```
+
+### Instalar NVM, Node.js, pnpm e Bun
+
+Instale o NVM (Node Version Manager):
+
+```bash
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
+source ~/.bashrc
+```
+
+Instale a versão LTS do Node.js:
+
+```bash
+nvm install --lts
+nvm use --lts
+node --version
+npm --version
+```
+
+Ative o pnpm pelo Corepack:
+
+```bash
+corepack enable
+corepack prepare pnpm@latest --activate
+pnpm --version
+```
+
+Instale o Bun:
+
+```bash
+curl -fsSL https://bun.sh/install | bash
+source ~/.bashrc
+bun --version
+```
+
+### Criar uma aplicação Next.js
+
+Na pasta `~/projetos`, execute uma das opções:
+
+```bash
+npx create-next-app@latest
+```
+
+Ou, usando pnpm ou Bun:
+
+```bash
+pnpm create next-app@latest
+bunx create-next-app@latest
+```
+
+Entre na pasta criada e inicie o servidor de desenvolvimento:
+
+```bash
+cd nome-do-projeto
+pnpm run dev
+```
+
+Por padrão, a aplicação estará disponível em `http://localhost:3000` no Ubuntu Server. Esse `localhost` representa o servidor, e não o computador Windows.
+
+Para permitir o acesso pela rede local, inicie o Next.js escutando em todas as interfaces:
+
+```bash
+pnpm run dev -- -H 0.0.0.0
+```
+
+Depois, abra no navegador do Windows:
+
+[http://192.168.8.10:3000](http://192.168.8.10:3000)
+
+### Testar o Hot Reload
+
+Abra o projeto pelo **VS Code > Remote SSH** e edite:
+
+```text
+src/app/page.tsx
+```
+
+Altere algum texto e salve o arquivo. O navegador deverá atualizar automaticamente.
+
+```text
+PC Windows
+        |
+        | VS Code Remote SSH
+        v
+Ubuntu Server
+        |
+        ├── Arquivos do projeto
+        ├── Node.js
+        └── Next.js
+                        |
+                        v
+            Navegador Windows
+```
+
+## Configurar a conexão com o banco
+
+Como o Next.js está sendo executado diretamente no Ubuntu Server e o PostgreSQL está exposto apenas em `127.0.0.1:5432`, o arquivo `.env` do projeto pode usar:
+
+```dotenv
+DATABASE_URL="postgresql://sousa:TUA_SENHA@127.0.0.1:5432/meu_primeiro_app?schema=public"
+```
+
+Substitua `TUA_SENHA` pela senha definida em `POSTGRES_PASSWORD`.
+
+> **Nota:** usamos `127.0.0.1` porque o comando `pnpm run dev` está sendo executado diretamente no Ubuntu Server.
+
+Quando o projeto também for executado em Docker, a URL deverá usar o nome do serviço PostgreSQL na rede Docker:
+
+```dotenv
+DATABASE_URL="postgresql://sousa:TUA_SENHA@postgres:5432/meu_primeiro_app?schema=public"
+```
+
+## Criar um modelo Prisma
+
+Abra o arquivo:
+
+```text
+prisma/schema.prisma
+```
+
+Exemplo:
+
+```prisma
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+model User {
+    id        String   @id @default(cuid())
+    name      String
+    email     String   @unique
+    createdAt DateTime @default(now())
+}
+```
 
