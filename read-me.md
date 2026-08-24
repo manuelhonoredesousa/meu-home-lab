@@ -268,3 +268,71 @@ Depois, conecte-se usando apenas o nome do atalho:
 ```powershell
 ssh pcServerName
 ```
+
+## Administrar o servidor com o Tabby
+
+Como alternativa ao PowerShell, pode usar o [Tabby](https://tabby.sh/):
+
+1. Abra o Tabby.
+2. Clique em **New Profile**.
+3. Escolha **SSH Connection**.
+4. Preencha os dados:
+
+    - **Name:** `pcServerName`
+    - **Host:** `192.168.8.10`
+    - **User:** `sousa`
+    - **Authentication:** selecione a chave privada `id_ed25519`.
+
+    A chave normalmente fica em um destes locais:
+
+    ```text
+    ~/.ssh/id_ed25519
+    C:\Users\TEU_USUARIO\.ssh\id_ed25519
+    ```
+
+5. Salve o perfil.
+
+Depois, para administrar o servidor, basta abrir o perfil `pcServerName`.
+
+Outra alternativa para manipular arquivos com uma interface gráfica é o [Snowflake](https://github.com/subhra74/snowflake/).
+
+## Acessar o servidor pelo VS Code
+
+No computador Windows:
+
+1. Abra o VS Code.
+2. Instale a extensão **Remote - SSH**.
+3. Pressione `Ctrl+Shift+P`.
+4. Procure por `Remote-SSH: Connect to Host`.
+5. Escolha `pcServerName`.
+
+## Criar a pasta principal dos projetos
+
+Depois de conectar ao servidor pelo VS Code, abra o terminal integrado e execute:
+
+```bash
+mkdir -p ~/projetos
+```
+
+## Configurar o Git no servidor
+
+### Verificar a instalação
+
+```bash
+git --version
+```
+
+Se o Git não estiver instalado:
+
+```bash
+sudo apt install git -y
+```
+
+### Configurar o usuário do Git
+
+Substitua os valores pelos seus dados:
+
+```bash
+git config --global user.name "Teu Nome"
+git config --global user.email "teu-email@example.com"
+```
