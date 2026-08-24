@@ -337,3 +337,134 @@ git config --global user.name "Teu Nome"
 git config --global user.email "teu-email@example.com"
 ```
 
+## Instalar Docker e Docker Compose
+
+### Atualizar o sistema
+
+```bash
+sudo apt update
+sudo apt upgrade -y
+```
+
+### Instalar os pacotes necessários
+
+```bash
+sudo apt install ca-certificates curl gnupg -y
+```
+
+### Adicionar o repositório oficial do Docker
+
+Crie o diretório para as chaves:
+
+```bash
+sudo install -m 0755 -d /etc/apt/keyrings
+```
+
+Adicione a chave oficial do Docker:
+
+```bash
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | \
+sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+```
+
+Ajuste a permissão da chave:
+
+```bash
+sudo chmod a+r /etc/apt/keyrings/docker.gpg
+```
+
+Adicione o repositório:
+
+```bash
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
+sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+```
+
+Atualize a lista de pacotes:
+
+```bash
+sudo apt update
+```
+
+### Instalar o Docker
+
+```bash
+sudo apt install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin -y
+```
+
+Verifique as versões instaladas:
+
+```bash
+docker --version
+docker compose version
+```
+
+Os comandos devem mostrar as versões do Docker e do Docker Compose.
+
+### Testar o Docker
+
+```bash
+sudo docker run hello-world
+```
+
+Se a mensagem de boas-vindas for exibida, o Docker está funcionando.
+
+### Usar o Docker sem `sudo`
+
+Por padrão, seria necessário executar comandos como `sudo docker ps`. Para permitir o uso do Docker diretamente pelo usuário atual:
+
+```bash
+sudo usermod -aG docker $USER
+```
+
+Encerre a sessão SSH:
+
+```bash
+exit
+```
+
+Conecte-se novamente:
+
+```powershell
+ssh pcServerName
+```
+
+Teste o acesso sem `sudo`:
+
+```bash
+docker ps
+```
+
+### Criar a estrutura de diretórios
+
+Crie a pasta principal e suas subpastas:
+
+```bash
+sudo mkdir -p /opt/pcServerName/{stacks,data,backups,scripts}
+```
+
+A estrutura criada será:
+
+```text
+/opt/pcServerName/
+├── backups
+├── data
+├── scripts
+└── stacks
+```
+
+### Criar a rede Docker
+
+Crie uma rede para os serviços:
+
+```bash
+docker network create pcServerName
+```
+
+Verifique se a rede foi criada:
+
+```bash
+docker network ls
+docker network inspect pcServerName
+```
+
