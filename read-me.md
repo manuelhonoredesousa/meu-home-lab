@@ -705,4 +705,238 @@ Ao executar `docker compose down`, o container é removido, mas o volume continu
 
 > **Atenção:** não use `docker compose down -v` sem saber exatamente o que está fazendo. A opção `-v` remove os volumes associados e pode apagar os dados persistentes.
 
+## Instalar o pgAdmin em Docker
+
+O pgAdmin será executado em um container e conectado ao PostgreSQL pela rede Docker `pcServerName`.
+
+### Criar a pasta do pgAdmin
+
+No Ubuntu Server, execute:
+
+```bash
+sudo mkdir -p /opt/pcServerName/stacks/pgadmin
+cd /opt/pcServerName/stacks/pgadmin
+```
+
+### Criar o arquivo `.env`
+
+```bash
+sudo nano .env
+```
+
+Adicione o conteúdo abaixo e substitua a senha:
+
+```dotenv
+PGADMIN_DEFAULT_EMAIL=sousa@pcServerName.local
+PGADMIN_DEFAULT_PASSWORD=COLOQUE_UMA_SENHA_FORTE
+```
+
+No `nano`, salve com `Ctrl+O`, pressione `Enter` e saia com `Ctrl+X`. Depois proteja o arquivo:
+
+```bash
+sudo chmod 600 .env
+```
+
+### Criar o Docker Compose
+
+```bash
+sudo nano compose.yml
+```
+
+Adicione:
+
+```yaml
+services:
+    pgadmin:
+        image: dpage/pgadmin4:latest
+        container_name: pgadmin
+        restart: unless-stopped
+
+        environment:
+            PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+            PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+
+        ports:
+            - "5050:80"
+
+        volumes:
+            - pgadmin_data:/var/lib/pgadmin
+
+        networks:
+            - pcServerName
+
+volumes:
+    pgadmin_data:
+
+networks:
+    pcServerName:
+        external: true
+```
+
+### Iniciar o pgAdmin
+
+Na pasta `/opt/pcServerName/stacks/pgadmin`, execute:
+
+```bash
+docker compose up -d
+docker ps
+```
+
+### Abrir o pgAdmin
+
+No navegador do Windows, acesse:
+
+[http://192.168.8.10:5050](http://192.168.8.10:5050)
+
+Entre com:
+
+- **Email:** `sousa@pcServerName.local`
+- **Password:** a senha definida no arquivo `.env`
+
+### Conectar o pgAdmin ao PostgreSQL
+
+Dentro do pgAdmin, acesse **Servers > Register > Server**.
+
+Na aba **General**:
+
+- **Name:** `pcServerName PostgreSQL`
+
+Na aba **Connection**, use:
+
+- **Host name/address:** `postgres`
+- **Port:** `5432`
+- **Username:** `sousa`
+- **Password:** a senha definida em `POSTGRES_PASSWORD`
+
+> **Importante:** não use `localhost` nem `192.168.8.10` como host. Como o pgAdmin e o PostgreSQL estão na mesma rede Docker, o nome do container `postgres` é o endereço correto.
+
+Salve a conexão. O PostgreSQL deverá aparecer na lista de servidores do pgAdmin.
+
+## Configurar backups automáticos do PostgreSQL
+
+Os backups serão criados com `pg_dumpall`, compactados com `gzip` e mantidos por 14 dias.
+
+### Criar as pastas dos backups e scripts
+
+```bash
+sudo mkdir -p /opt/pcServerName/backups/postgres
+sudo mkdir -p /opt/pcServerName/scripts
+sudo chown -R sousa:sousa /opt/pcServerName/backups /opt/pcServerName/scripts
+```
+
+O último comando permite que o usuário `sousa`, que executará o cron, grave os backups e os logs.
+
+### Criar o script de backup
+
+```bash
+nano /opt/pcServerName/scripts/backup-postgres.sh
+```
+
+Adicione:
+
+```bash
+#!/bin/bash
+
+set -e
+
+BACKUP_DIR="/opt/pcServerName/backups/postgres"
+DATE=$(date +"%Y-%m-%d_%H-%M-%S")
+BACKUP_FILE="$BACKUP_DIR/postgres_$DATE.sql"
+
+mkdir -p "$BACKUP_DIR"
+
+docker exec postgres pg_dumpall -U sousa > "$BACKUP_FILE"
+gzip "$BACKUP_FILE"
+
+find "$BACKUP_DIR" -type f -name "*.sql.gz" -mtime +14 -delete
+
+echo "Backup criado: $BACKUP_FILE.gz"
+```
+
+Torne o script executável:
+
+```bash
+chmod +x /opt/pcServerName/scripts/backup-postgres.sh
+ls -l /opt/pcServerName/scripts/
+```
+
+O arquivo deverá ter permissão de execução, semelhante a `-rwxr-xr-x`.
+
+### Executar o primeiro backup manualmente
+
+Teste o script antes de automatizá-lo:
+
+```bash
+/opt/pcServerName/scripts/backup-postgres.sh
+ls -lh /opt/pcServerName/backups/postgres/
+```
+
+Deverá encontrar um arquivo semelhante a:
+
+```text
+postgres_2026-08-25_00-15-00.sql.gz
+```
+
+### Verificar o conteúdo do backup
+
+Substitua `NOME_DO_ARQUIVO` pelo nome real do arquivo:
+
+```bash
+zcat /opt/pcServerName/backups/postgres/NOME_DO_ARQUIVO.sql.gz | head
+```
+
+Deverá aparecer conteúdo SQL.
+
+### Automatizar o backup com Cron
+
+Abra o cron do usuário `sousa`:
+
+```bash
+crontab -e
+```
+
+Se for a primeira vez, escolha `nano`. Adicione ao final:
+
+```cron
+0 2 * * * /opt/pcServerName/scripts/backup-postgres.sh >> /opt/pcServerName/backups/postgres/backup.log 2>&1
+```
+
+Essa configuração executa o backup todos os dias às `02:00`.
+
+Confirme a configuração:
+
+```bash
+crontab -l
+```
+
+### Verificar os logs
+
+Depois da execução do backup, consulte o log:
+
+```bash
+cat /opt/pcServerName/backups/postgres/backup.log
+```
+
+## Home Lab até agora
+
+```text
+Dell OptiPlex 5050
+|
+└── Ubuntu Server
+        |
+        ├── SSH
+        │   └── PC Windows
+        ├── Docker
+        ├── Portainer
+        ├── PostgreSQL
+        │   └── Volume persistente
+        ├── pgAdmin
+        │   └── Administração gráfica
+        └── Backup
+                ├── pg_dumpall
+                ├── Compressão
+                ├── Cron
+                └── Retenção de 14 dias
+```
+
 
