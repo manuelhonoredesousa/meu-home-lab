@@ -106,3 +106,165 @@ Procure o nome da interface de rede. Exemplos:
 - `enp0s31f6`
 - `eno1`
 - `eth0`
+
+## Configurar e testar o SSH
+
+### Confirmar se o SSH está funcionando
+
+No Ubuntu Server, execute:
+
+```bash
+sudo systemctl status ssh
+```
+
+O serviço deve aparecer como `active (running)`.
+
+Se o SSH não estiver instalado, execute:
+
+```bash
+sudo apt update
+sudo apt install openssh-server -y
+sudo systemctl enable ssh
+sudo systemctl start ssh
+```
+
+### Testar a ligação a partir do Windows
+
+No PowerShell do Windows, substitua o usuário e o endereço IP pelos dados do seu servidor:
+
+```powershell
+ssh sousa@192.168.8.10
+```
+
+Na primeira ligação, será exibida uma mensagem semelhante a esta:
+
+```text
+The authenticity of host '192.168.8.10' can't be established.
+Are you sure you want to continue connecting (yes/no/[fingerprint])?
+```
+
+Digite `yes` e, depois, informe a senha do usuário do Ubuntu Server. Se a ligação for bem-sucedida, verá um prompt semelhante a:
+
+```text
+sousa@pcServerName:~$
+```
+
+### Sair do servidor
+
+Para encerrar a sessão SSH:
+
+```bash
+exit
+```
+
+## Criar uma chave SSH no Windows
+
+No PowerShell do Windows, execute:
+
+```powershell
+ssh-keygen -t ed25519 -C "sousa-pcServerName"
+```
+
+Quando aparecer `Enter file in which to save the key`, pressione `Enter` para aceitar o local padrão.
+
+Quando aparecer `Enter passphrase`, escolha uma das opções:
+
+- Pressionar `Enter` para não usar uma senha na chave.
+- Definir uma passphrase para proteger a chave privada.
+
+### Arquivos criados
+
+No Windows, as chaves ficarão normalmente em:
+
+```text
+C:\Users\TEU_USUARIO\.ssh\
+```
+
+Serão criados:
+
+- `id_ed25519`: chave privada. Nunca compartilhe este arquivo.
+- `id_ed25519.pub`: chave pública.
+
+## Copiar a chave pública para o servidor
+
+No PowerShell do Windows, mostre a chave pública:
+
+```powershell
+type $env:USERPROFILE\.ssh\id_ed25519.pub
+```
+
+Copie a linha inteira, que será semelhante a:
+
+```text
+ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAI...
+```
+
+Conecte-se ao servidor usando a senha:
+
+```powershell
+ssh sousa@192.168.8.10
+```
+
+No servidor, crie a pasta de chaves e ajuste suas permissões:
+
+```bash
+mkdir -p ~/.ssh
+chmod 700 ~/.ssh
+```
+
+Abra o arquivo de chaves autorizadas:
+
+```bash
+nano ~/.ssh/authorized_keys
+```
+
+Cole a chave pública inteira e salve o arquivo:
+
+1. Pressione `Ctrl+O`.
+2. Pressione `Enter`.
+3. Pressione `Ctrl+X`.
+
+Ajuste as permissões do arquivo:
+
+```bash
+chmod 600 ~/.ssh/authorized_keys
+```
+
+## Testar a chave SSH
+
+Primeiro, saia do servidor:
+
+```bash
+exit
+```
+
+No PowerShell do Windows, conecte-se novamente:
+
+```powershell
+ssh sousa@192.168.8.10
+```
+
+Se tudo estiver correto, entrará no servidor sem precisar informar a senha da conta. Se criou uma passphrase, poderá ser necessário informá-la. A passphrase protege a chave e é diferente da senha do usuário do servidor.
+
+## Criar um atalho SSH (opcional)
+
+No Windows, crie ou edite o arquivo abaixo:
+
+```text
+C:\Users\TEU_USUARIO\.ssh\config
+```
+
+Adicione o seguinte conteúdo:
+
+```ssh-config
+Host pcServerName
+    HostName 192.168.8.10
+    User sousa
+    IdentityFile ~/.ssh/id_ed25519
+```
+
+Depois, conecte-se usando apenas o nome do atalho:
+
+```powershell
+ssh pcServerName
+```
