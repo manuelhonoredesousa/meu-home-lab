@@ -468,3 +468,241 @@ docker network ls
 docker network inspect pcServerName
 ```
 
+## Instalar o Portainer
+
+O Portainer é uma interface web para administrar o Docker:
+
+```text
+PC Windows (navegador)
+                    |
+                    v
+https://192.168.8.10:9443
+                    |
+                    v
+            Portainer
+                    |
+                    v
+                Docker
+```
+
+### Criar o volume do Portainer
+
+No Ubuntu Server, execute:
+
+```bash
+docker volume create portainer_data
+docker volume ls
+```
+
+Deve aparecer o volume `portainer_data`, que guarda os dados e as configurações do Portainer.
+
+### Criar o container
+
+```bash
+docker run -d \
+    -p 8000:8000 \
+    -p 9443:9443 \
+    --name portainer \
+    --restart=always \
+    -v /var/run/docker.sock:/var/run/docker.sock \
+    -v portainer_data:/data \
+    portainer/portainer-ce:latest
+```
+
+Verifique o container:
+
+```bash
+docker ps
+```
+
+Procure por `portainer/portainer-ce` com um estado semelhante a `Up`.
+
+### Abrir o Portainer
+
+No navegador do Windows, acesse:
+
+[https://192.168.8.10:9443](https://192.168.8.10:9443)
+
+Use `https`, e não `http`. Como o Portainer usa inicialmente um certificado próprio, o navegador pode mostrar um aviso de certificado. Isso é esperado no primeiro acesso dentro da rede local.
+
+### Criar a conta administrativa
+
+Na primeira página, crie um usuário e uma senha forte e exclusiva. Não reutilize a senha do Ubuntu.
+
+Depois de entrar no painel, acesse **Environments > local**. Deverá conseguir visualizar:
+
+- Containers
+- Images
+- Networks
+- Volumes
+- Stacks
+
+O Portainer é apenas uma interface para administrar o Docker. Os comandos abaixo continuam disponíveis:
+
+```bash
+docker ps
+docker logs <container>
+docker exec -it <container> <comando>
+docker compose up -d
+```
+
+> **Atenção:** não exponha a porta `9443` diretamente para a internet. Neste momento, use o Portainer somente pela rede local.
+
+## PostgreSQL em Docker
+
+A estrutura será:
+
+```text
+/opt/pcServerName/
+└── stacks/
+        └── postgres/
+                ├── compose.yml
+                └── .env
+```
+
+Os dados ficarão em um volume Docker, separados do container.
+
+### Criar a pasta do PostgreSQL
+
+No servidor, execute:
+
+```bash
+sudo mkdir -p /opt/pcServerName/stacks/postgres
+cd /opt/pcServerName/stacks/postgres
+pwd
+```
+
+O comando `pwd` deve mostrar:
+
+```text
+/opt/pcServerName/stacks/postgres
+```
+
+### Criar o arquivo `.env`
+
+As credenciais ficarão fora do `compose.yml`:
+
+```bash
+sudo nano .env
+```
+
+Adicione o conteúdo abaixo e substitua a senha:
+
+```dotenv
+POSTGRES_USER=sousa
+POSTGRES_PASSWORD=COLOQUE_UMA_SENHA_FORTE_AQUI
+POSTGRES_DB=pcServerName
+```
+
+No `nano`, salve com `Ctrl+O`, pressione `Enter` e saia com `Ctrl+X`. Depois proteja o arquivo:
+
+```bash
+sudo chmod 600 .env
+```
+
+### Criar o Docker Compose
+
+```bash
+sudo nano compose.yml
+```
+
+Adicione:
+
+```yaml
+services:
+    postgres:
+        image: postgres:18
+        container_name: postgres
+        restart: unless-stopped
+
+        environment:
+            POSTGRES_USER: ${POSTGRES_USER}
+            POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+            POSTGRES_DB: ${POSTGRES_DB}
+
+        volumes:
+            - postgres_data:/var/lib/postgresql
+
+        ports:
+            - "127.0.0.1:5432:5432"
+
+        networks:
+            - pcServerName
+
+volumes:
+    postgres_data:
+
+networks:
+    pcServerName:
+        external: true
+```
+
+> **Nota:** `127.0.0.1:5432:5432` limita o acesso direto ao próprio servidor. Outros computadores da rede não poderão acessar o PostgreSQL por essa porta. Os containers conectados à rede Docker `pcServerName` continuarão podendo comunicar-se com ele.
+
+### Iniciar o PostgreSQL
+
+Na pasta `/opt/pcServerName/stacks/postgres`, execute:
+
+```bash
+docker compose up -d
+docker ps
+```
+
+### Ver os logs
+
+```bash
+docker logs postgres
+```
+
+Procure uma mensagem semelhante a:
+
+```text
+database system is ready to accept connections
+```
+
+Para acompanhar os logs em tempo real:
+
+```bash
+docker logs -f postgres
+```
+
+Pressione `Ctrl+C` para sair.
+
+### Testar o PostgreSQL
+
+Entre no PostgreSQL dentro do container:
+
+```bash
+docker exec -it postgres psql -U sousa -d pcServerName
+```
+
+Se estiver funcionando, o prompt será semelhante a:
+
+```text
+pcServerName=#
+```
+
+Dentro do PostgreSQL, execute:
+
+```sql
+SELECT version();
+\l
+\dt
+\q
+```
+
+O comando `\q` encerra o cliente do PostgreSQL.
+
+### Verificar o volume
+
+```bash
+docker volume ls
+```
+
+Deverá aparecer um volume semelhante a `postgres_postgres_data`, dependendo do nome do projeto Compose. Esse volume mantém os dados persistentes.
+
+Ao executar `docker compose down`, o container é removido, mas o volume continua existindo. Ao executar `docker compose up -d` novamente, o PostgreSQL volta a utilizar os mesmos dados.
+
+> **Atenção:** não use `docker compose down -v` sem saber exatamente o que está fazendo. A opção `-v` remove os volumes associados e pode apagar os dados persistentes.
+
+
