@@ -915,6 +915,17 @@ Se for a primeira vez, escolha `nano`. Adicione ao final:
 ```cron
 0 2 * * * /opt/pcServerName/scripts/backup-postgres.sh >> /opt/pcServerName/backups/postgres/backup.log 2>&1
 ```
+Isso significa:
+
+0 2 * * *
+│ │ │ │ │
+│ │ │ │ └── Todos os dias da semana
+│ │ │ └──── Todos os meses
+│ │ └────── Todos os dias
+│ └──────── 02 horas
+└────────── 00 minutos
+
+OBS: As horas vão no formato de 24 horas, ex: (20 horas fica -> 20)
 
 Essa configuração executa o backup todos os dias às `02:00`.
 
