@@ -8,6 +8,9 @@ Ferramentas úteis para acompanhar o desempenho e o estado do Ubuntu Server.
 - [Disco e armazenamento](#disco-e-armazenamento)
 - [Rede](#rede)
 - [Sumários rápidos](#sumários-rápidos)
+- [Para Gerenciar o Servidor (Ubuntu)](#para-gerenciar-o-servidor-ubuntu)
+- [Para Gerenciar o Docker](#para-gerenciar-o-docker)
+- [Para Monitoramento Avançado e Gráficos](#para-monitoramento-avançado-e-gráficos)
 
 ## Monitorização geral
 
@@ -106,3 +109,62 @@ Para executar:
 ```bash
 glances
 ```
+
+## Para Gerenciar o Servidor (Ubuntu)
+
+### Cockpit
+
+**O que faz:** painel web para gerenciar o Ubuntu Server.
+
+**Funções:** monitora CPU, memória e discos, gerencia usuários e atualizações e oferece um terminal web integrado.
+
+**Instalação:**
+
+```bash
+sudo apt update
+sudo apt install cockpit -y
+sudo systemctl enable --now cockpit.socket
+```
+
+Acesse `https://IP_DO_SERVIDOR:9090` no navegador.
+
+## Para Gerenciar o Docker
+
+### Portainer CE
+
+**O que faz:** interface web para administrar o Docker.
+
+**Funções:** cria, inicia, pausa e remove containers, gerencia volumes e redes e mostra logs em tempo real.
+
+**Instalação:**
+
+```bash
+docker volume create portainer_data
+docker run -d \
+	-p 8000:8000 \
+	-p 9443:9443 \
+	--name portainer \
+	--restart=always \
+	-v /var/run/docker.sock:/var/run/docker.sock \
+	-v portainer_data:/data \
+	portainer/portainer-ce:lts
+```
+
+Acesse `https://IP_DO_SERVIDOR:9443` no navegador.
+
+## Para Monitoramento Avançado e Gráficos
+
+### Netdata
+
+**O que faz:** monitoramento visual em tempo real do servidor e dos containers Docker.
+
+**Funções:** apresenta gráficos interativos de CPU, memória, discos, rede e outros recursos do sistema.
+
+**Instalação:**
+
+```bash
+wget -O /tmp/netdata-kickstart.sh https://get.netdata.cloud/kickstart.sh
+sudo sh /tmp/netdata-kickstart.sh
+```
+
+Acesse `http://IP_DO_SERVIDOR:19999` no navegador.
