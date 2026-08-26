@@ -1,18 +1,23 @@
 # Meu Home Lab
 
-Documentação do meu laboratório doméstico com Ubuntu Server, incluindo a instalação inicial, a configuração da rede e as ferramentas de monitorização do sistema.
+Documentação do meu laboratório doméstico, organizada por área para facilitar a instalação, a configuração e a gestão dos serviços.
 
 ## Índice
 
-- [Configuração inicial do Ubuntu Server](pages/setup.md)
+- [Instalação e configuração do Ubuntu Server](pages/setup.md)
 - [Monitorização do sistema](pages/monitoracao.md)
+- [Odysseus AI](pages/odysseus.md)
 
 ## Guias
 
-### Configuração inicial
+### Ubuntu Server
 
-Consulte o guia de [instalação e configuração do Ubuntu Server](pages/setup.md), que inclui os passos para configurar a rede, ativar o SSH e criar uma chave de acesso.
+Consulte o guia de [instalação e configuração do Ubuntu Server](pages/setup.md) para configurar a rede, ativar o SSH e criar uma chave de acesso segura.
 
 ### Monitorização
 
 Veja o guia de [monitorização do sistema](pages/monitoracao.md) para acompanhar o uso de CPU, memória, processos, armazenamento e rede.
+
+### Odysseus
+
+Siga o guia de [instalação do Odysseus](pages/odysseus.md) para preparar um ambiente local com IA autogerida.
