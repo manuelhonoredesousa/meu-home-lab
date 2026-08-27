@@ -107,6 +107,30 @@ Procure o nome da interface de rede. Exemplos:
 - `eno1`
 - `eth0`
 
+### Usar `beta` em vez de `localhost`
+
+Para que o Ubuntu Server reconheça `beta` como um nome local, mapeie esse nome para o endereço de loopback no arquivo de hosts do sistema.
+
+Abra o arquivo com privilégios de administrador:
+
+```bash
+sudo nano /etc/hosts
+```
+
+Localize a linha que aponta para `localhost` e adicione `beta` ao final dela. Ela deverá ficar assim:
+
+```text
+127.0.0.1 localhost beta
+```
+
+No `nano`, salve com `Ctrl+O`, pressione `Enter` e saia com `Ctrl+X`.
+
+Teste a alteração:
+
+```bash
+ping beta
+```
+
 ## Configurar e testar o SSH
 
 ### Confirmar se o SSH está funcionando
