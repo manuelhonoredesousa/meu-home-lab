@@ -19,6 +19,7 @@ Antes de começar, vale lembrar:
 - [Monitorização do sistema](pages/monitoracao.md)
 - [Terminal e comandos úteis](pages/terminal.md)
 - [Odysseus AI](pages/odysseus.md)
+- [Outras aplicações](pages/outros-app.md)
 
 ## Guias
 
@@ -37,6 +38,10 @@ Use a página de [terminal e comandos úteis](pages/terminal.md) como referênci
 ### Odysseus
 
 Siga o guia de [instalação do Odysseus](pages/odysseus.md) para preparar um ambiente local com IA autogerida.
+
+### Outras aplicações
+
+Consulte a página de [outras aplicações](pages/outros-app.md) para instalar ferramentas auto-hospedadas de manipulação e compressão de ficheiros PDF.
 
 ## Tópicos relevantes para o home lab
 
