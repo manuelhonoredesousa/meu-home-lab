@@ -131,6 +131,36 @@ Teste a alteração:
 ping beta
 ```
 
+### Usar o mDNS / Avahi na rede
+
+Se não quiser alterar o arquivo `hosts` de cada computador, use o Avahi para anunciar o Ubuntu Server na rede por mDNS. Assim, o servidor poderá ser acessado pelo endereço `beta.local`, incluindo a porta da aplicação, por exemplo: `http://beta.local:3000`.
+
+Instale o serviço no Ubuntu Server:
+
+```bash
+sudo apt update && sudo apt install avahi-daemon -y
+```
+
+Altere o hostname do Ubuntu para `beta`:
+
+```bash
+sudo hostnamectl set-hostname beta
+```
+
+Ative e inicie o serviço Avahi:
+
+```bash
+sudo systemctl enable --now avahi-daemon
+```
+
+Teste a resolução do nome a partir de outro computador da rede:
+
+```bash
+ping beta.local
+```
+
+O serviço vai propagar o nome automaticamente. Agora, qualquer dispositivo na rede (Windows, Mac ou celular) conseguirá acessar o servidor digitando beta.local:3000 no navegador.
+
 ## Configurar e testar o SSH
 
 ### Confirmar se o SSH está funcionando
@@ -1062,6 +1092,8 @@ pnpm run dev
 ```
 
 Por padrão, a aplicação estará disponível em `http://localhost:3000` no Ubuntu Server. Esse `localhost` representa o servidor, e não o computador Windows.
+
+Com o mDNS / Avahi configurado, ela também poderá ser acessada por `http://beta.local:3000` em outro computador da rede.
 
 Para permitir o acesso pela rede local, inicie o Next.js escutando em todas as interfaces:
 
