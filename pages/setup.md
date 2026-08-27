@@ -917,13 +917,11 @@ Se for a primeira vez, escolha `nano`. Adicione ao final:
 ```
 Isso significa:
 
-0 2 * * *
-│ │ │ │ │
-│ │ │ │ └── Todos os dias da semana
-│ │ │ └──── Todos os meses
-│ │ └────── Todos os dias
-│ └──────── 02 horas
-└────────── 00 minutos
+" 0 " - 00 minutos
+" 2 " - 02 horas
+" * " - Todos os dias
+" * " - Todos os meses
+" * " - Todos os dias da semana
 
 OBS: As horas vão no formato de 24 horas, ex: (20 horas fica -> 20)
 
