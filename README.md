@@ -18,6 +18,7 @@ Antes de começar, vale lembrar:
 - [Instalação e configuração do Ubuntu Server](pages/setup.md)
 - [Monitorização do sistema](pages/monitoracao.md)
 - [Terminal e comandos úteis](pages/terminal.md)
+- [File Browser](pages/file-browser.md)
 - [Odysseus AI](pages/odysseus.md)
 - [Outras aplicações](pages/outros-app.md)
 
