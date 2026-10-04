@@ -187,20 +187,20 @@ sudo systemctl start ssh
 No PowerShell do Windows, substitua o usuário e o endereço IP pelos dados do seu servidor:
 
 ```powershell
-ssh sousa@192.168.8.10
+ssh sousa@192.168.0.2
 ```
 
 Na primeira ligação, será exibida uma mensagem semelhante a esta:
 
 ```text
-The authenticity of host '192.168.8.10' can't be established.
+The authenticity of host '192.168.0.2' can't be established.
 Are you sure you want to continue connecting (yes/no/[fingerprint])?
 ```
 
 Digite `yes` e, depois, informe a senha do usuário do Ubuntu Server. Se a ligação for bem-sucedida, verá um prompt semelhante a:
 
 ```text
-sousa@pcServerName:~$
+sousa@beta:~$
 ```
 
 ### Sair do servidor
@@ -216,7 +216,7 @@ exit
 No PowerShell do Windows, execute:
 
 ```powershell
-ssh-keygen -t ed25519 -C "sousa-pcServerName"
+ssh-keygen -t ed25519 -C "sousa-beta"
 ```
 
 Quando aparecer `Enter file in which to save the key`, pressione `Enter` para aceitar o local padrão.
@@ -256,7 +256,7 @@ ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAI...
 Conecte-se ao servidor usando a senha:
 
 ```powershell
-ssh sousa@192.168.8.10
+ssh sousa@192.168.0.2
 ```
 
 No servidor, crie a pasta de chaves e ajuste suas permissões:
@@ -295,7 +295,7 @@ exit
 No PowerShell do Windows, conecte-se novamente:
 
 ```powershell
-ssh sousa@192.168.8.10
+ssh sousa@192.168.0.2
 ```
 
 Se tudo estiver correto, entrará no servidor sem precisar informar a senha da conta. Se criou uma passphrase, poderá ser necessário informá-la. A passphrase protege a chave e é diferente da senha do usuário do servidor.
@@ -311,8 +311,8 @@ C:\Users\TEU_USUARIO\.ssh\config
 Adicione o seguinte conteúdo:
 
 ```ssh-config
-Host pcServerName
-    HostName 192.168.8.10
+Host beta
+    HostName 192.168.0.2
     User sousa
     IdentityFile ~/.ssh/id_ed25519
 ```
@@ -320,7 +320,7 @@ Host pcServerName
 Depois, conecte-se usando apenas o nome do atalho:
 
 ```powershell
-ssh pcServerName
+ssh beta
 ```
 
 ## Administrar o servidor com o Tabby
@@ -332,8 +332,8 @@ Como alternativa ao PowerShell, pode usar o [Tabby](https://tabby.sh/):
 3. Escolha **SSH Connection**.
 4. Preencha os dados:
 
-    - **Name:** `pcServerName`
-    - **Host:** `192.168.8.10`
+    - **Name:** `beta`
+    - **Host:** `192.168.0.2`
     - **User:** `sousa`
     - **Authentication:** selecione a chave privada `id_ed25519`.
 
@@ -346,7 +346,7 @@ Como alternativa ao PowerShell, pode usar o [Tabby](https://tabby.sh/):
 
 5. Salve o perfil.
 
-Depois, para administrar o servidor, basta abrir o perfil `pcServerName`.
+Depois, para administrar o servidor, basta abrir o perfil `beta`.
 
 Outra alternativa para manipular arquivos com uma interface gráfica é o [Snowflake](https://github.com/subhra74/snowflake/).
 
@@ -358,7 +358,7 @@ No computador Windows:
 2. Instale a extensão **Remote - SSH**.
 3. Pressione `Ctrl+Shift+P`.
 4. Procure por `Remote-SSH: Connect to Host`.
-5. Escolha `pcServerName`.
+5. Escolha `beta`.
 
 ## Criar a pasta principal dos projetos
 
@@ -480,7 +480,7 @@ exit
 Conecte-se novamente:
 
 ```powershell
-ssh pcServerName
+ssh beta
 ```
 
 Teste o acesso sem `sudo`:
@@ -494,13 +494,13 @@ docker ps
 Crie a pasta principal e suas subpastas:
 
 ```bash
-sudo mkdir -p /opt/pcServerName/{stacks,data,backups,scripts}
+sudo mkdir -p /opt/beta/{stacks,data,backups,scripts}
 ```
 
 A estrutura criada será:
 
 ```text
-/opt/pcServerName/
+/opt/beta/
 ├── backups
 ├── data
 ├── scripts
@@ -512,14 +512,14 @@ A estrutura criada será:
 Crie uma rede para os serviços:
 
 ```bash
-docker network create pcServerName
+docker network create beta
 ```
 
 Verifique se a rede foi criada:
 
 ```bash
 docker network ls
-docker network inspect pcServerName
+docker network inspect beta
 ```
 
 ## Instalar o Portainer
@@ -530,7 +530,7 @@ O Portainer é uma interface web para administrar o Docker:
 PC Windows (navegador)
                     |
                     v
-https://192.168.8.10:9443
+https://192.168.0.2:9443
                     |
                     v
             Portainer
@@ -575,7 +575,7 @@ Procure por `portainer/portainer-ce` com um estado semelhante a `Up`.
 
 No navegador do Windows, acesse:
 
-[https://192.168.8.10:9443](https://192.168.8.10:9443)
+[https://192.168.0.2:9443](https://192.168.0.2:9443)
 
 Use `https`, e não `http`. Como o Portainer usa inicialmente um certificado próprio, o navegador pode mostrar um aviso de certificado. Isso é esperado no primeiro acesso dentro da rede local.
 
@@ -607,7 +607,7 @@ docker compose up -d
 A estrutura será:
 
 ```text
-/opt/pcServerName/
+/opt/beta/
 └── stacks/
         └── postgres/
                 ├── compose.yml
@@ -621,15 +621,15 @@ Os dados ficarão em um volume Docker, separados do container.
 No servidor, execute:
 
 ```bash
-sudo mkdir -p /opt/pcServerName/stacks/postgres
-cd /opt/pcServerName/stacks/postgres
+sudo mkdir -p /opt/beta/stacks/postgres
+cd /opt/beta/stacks/postgres
 pwd
 ```
 
 O comando `pwd` deve mostrar:
 
 ```text
-/opt/pcServerName/stacks/postgres
+/opt/beta/stacks/postgres
 ```
 
 ### Criar o arquivo `.env`
@@ -645,7 +645,7 @@ Adicione o conteúdo abaixo e substitua a senha:
 ```dotenv
 POSTGRES_USER=sousa
 POSTGRES_PASSWORD=COLOQUE_UMA_SENHA_FORTE_AQUI
-POSTGRES_DB=pcServerName
+POSTGRES_DB=beta
 ```
 
 No `nano`, salve com `Ctrl+O`, pressione `Enter` e saia com `Ctrl+X`. Depois proteja o arquivo:
@@ -681,21 +681,21 @@ services:
             - "127.0.0.1:5432:5432"
 
         networks:
-            - pcServerName
+            - beta
 
 volumes:
     postgres_data:
 
 networks:
-    pcServerName:
+    beta:
         external: true
 ```
 
-> **Nota:** `127.0.0.1:5432:5432` limita o acesso direto ao próprio servidor. Outros computadores da rede não poderão acessar o PostgreSQL por essa porta. Os containers conectados à rede Docker `pcServerName` continuarão podendo comunicar-se com ele.
+> **Nota:** `127.0.0.1:5432:5432` limita o acesso direto ao próprio servidor. Outros computadores da rede não poderão acessar o PostgreSQL por essa porta. Os containers conectados à rede Docker `beta` continuarão podendo comunicar-se com ele.
 
 ### Iniciar o PostgreSQL
 
-Na pasta `/opt/pcServerName/stacks/postgres`, execute:
+Na pasta `/opt/beta/stacks/postgres`, execute:
 
 ```bash
 docker compose up -d
@@ -707,8 +707,8 @@ Se der falha usa
 ```bash
 sudo chown sousa:sousa .env
 #ou
-sudo chown sousa:sousa /opt/pcServerName/stacks/postgres.env
-sudo chmod 644 /opt/pcServerName/stacks/postgres.env
+sudo chown sousa:sousa /opt/beta/stacks/postgres.env
+sudo chmod 644 /opt/beta/stacks/postgres.env
 ```
 
 ### Ver os logs
@@ -736,13 +736,13 @@ Pressione `Ctrl+C` para sair.
 Entre no PostgreSQL dentro do container:
 
 ```bash
-docker exec -it postgres psql -U sousa -d pcServerName
+docker exec -it postgres psql -U sousa -d beta
 ```
 
 Se estiver funcionando, o prompt será semelhante a:
 
 ```text
-pcServerName=#
+beta=#
 ```
 
 Dentro do PostgreSQL, execute:
@@ -770,15 +770,15 @@ Ao executar `docker compose down`, o container é removido, mas o volume continu
 
 ## Instalar o pgAdmin em Docker
 
-O pgAdmin será executado em um container e conectado ao PostgreSQL pela rede Docker `pcServerName`.
+O pgAdmin será executado em um container e conectado ao PostgreSQL pela rede Docker `beta`.
 
 ### Criar a pasta do pgAdmin
 
 No Ubuntu Server, execute:
 
 ```bash
-sudo mkdir -p /opt/pcServerName/stacks/pgadmin
-cd /opt/pcServerName/stacks/pgadmin
+sudo mkdir -p /opt/beta/stacks/pgadmin
+cd /opt/beta/stacks/pgadmin
 ```
 
 ### Criar o arquivo `.env`
@@ -790,7 +790,7 @@ sudo nano .env
 Adicione o conteúdo abaixo e substitua a senha:
 
 ```dotenv
-PGADMIN_DEFAULT_EMAIL=sousa@pcServerName.com
+PGADMIN_DEFAULT_EMAIL=sousa@beta.com
 PGADMIN_DEFAULT_PASSWORD=COLOQUE_UMA_SENHA_FORTE
 ```
 
@@ -826,19 +826,19 @@ services:
             - pgadmin_data:/var/lib/pgadmin
 
         networks:
-            - pcServerName
+            - beta
 
 volumes:
     pgadmin_data:
 
 networks:
-    pcServerName:
+    beta:
         external: true
 ```
 
 ### Iniciar o pgAdmin
 
-Na pasta `/opt/pcServerName/stacks/pgadmin`, execute:
+Na pasta `/opt/beta/stacks/pgadmin`, execute:
 
 ```bash
 docker compose up -d
@@ -855,11 +855,11 @@ docker logs pgadmin
 
 No navegador do Windows, acesse:
 
-[http://192.168.8.10:5050](http://192.168.8.10:5050)
+[http://192.168.0.2:5050](http://192.168.0.2:5050)
 
 Entre com:
 
-- **Email:** `sousa@pcServerName.com`
+- **Email:** `sousa@beta.com`
 - **Password:** a senha definida no arquivo `.env`
 
 ### Conectar o pgAdmin ao PostgreSQL
@@ -868,7 +868,7 @@ Dentro do pgAdmin, acesse **Servers > Register > Server**.
 
 Na aba **General**:
 
-- **Name:** `pcServerName PostgreSQL`
+- **Name:** `beta PostgreSQL`
 
 Na aba **Connection**, use:
 
@@ -877,7 +877,7 @@ Na aba **Connection**, use:
 - **Username:** `sousa`
 - **Password:** a senha definida em `POSTGRES_PASSWORD`
 
-> **Importante:** não use `localhost` nem `192.168.8.10` como host. Como o pgAdmin e o PostgreSQL estão na mesma rede Docker, o nome do container `postgres` é o endereço correto.
+> **Importante:** não use `localhost` nem `192.168.0.2` como host. Como o pgAdmin e o PostgreSQL estão na mesma rede Docker, o nome do container `postgres` é o endereço correto.
 
 Salve a conexão. O PostgreSQL deverá aparecer na lista de servidores do pgAdmin.
 
@@ -888,9 +888,9 @@ Os backups serão criados com `pg_dumpall`, compactados com `gzip` e mantidos po
 ### Criar as pastas dos backups e scripts
 
 ```bash
-sudo mkdir -p /opt/pcServerName/backups/postgres
-sudo mkdir -p /opt/pcServerName/scripts
-sudo chown -R sousa:sousa /opt/pcServerName/backups /opt/pcServerName/scripts
+sudo mkdir -p /opt/beta/backups/postgres
+sudo mkdir -p /opt/beta/scripts
+sudo chown -R sousa:sousa /opt/beta/backups /opt/beta/scripts
 ```
 
 O último comando permite que o usuário `sousa`, que executará o cron, grave os backups e os logs.
@@ -898,7 +898,7 @@ O último comando permite que o usuário `sousa`, que executará o cron, grave o
 ### Criar o script de backup
 
 ```bash
-nano /opt/pcServerName/scripts/backup-postgres.sh
+nano /opt/beta/scripts/backup-postgres.sh
 ```
 
 Adicione:
@@ -908,7 +908,7 @@ Adicione:
 
 set -e
 
-BACKUP_DIR="/opt/pcServerName/backups/postgres"
+BACKUP_DIR="/opt/beta/backups/postgres"
 DATE=$(date +"%Y-%m-%d_%H-%M-%S")
 BACKUP_FILE="$BACKUP_DIR/postgres_$DATE.sql"
 
@@ -925,8 +925,8 @@ echo "Backup criado: $BACKUP_FILE.gz"
 Torne o script executável:
 
 ```bash
-chmod +x /opt/pcServerName/scripts/backup-postgres.sh
-ls -l /opt/pcServerName/scripts/
+chmod +x /opt/beta/scripts/backup-postgres.sh
+ls -l /opt/beta/scripts/
 ```
 
 O arquivo deverá ter permissão de execução, semelhante a `-rwxr-xr-x`.
@@ -936,8 +936,8 @@ O arquivo deverá ter permissão de execução, semelhante a `-rwxr-xr-x`.
 Teste o script antes de automatizá-lo:
 
 ```bash
-/opt/pcServerName/scripts/backup-postgres.sh
-ls -lh /opt/pcServerName/backups/postgres/
+/opt/beta/scripts/backup-postgres.sh
+ls -lh /opt/beta/backups/postgres/
 ```
 
 Deverá encontrar um arquivo semelhante a:
@@ -951,7 +951,7 @@ postgres_2026-08-25_00-15-00.sql.gz
 Substitua `NOME_DO_ARQUIVO` pelo nome real do arquivo:
 
 ```bash
-zcat /opt/pcServerName/backups/postgres/NOME_DO_ARQUIVO.sql.gz | head
+zcat /opt/beta/backups/postgres/NOME_DO_ARQUIVO.sql.gz | head
 ```
 
 Deverá aparecer conteúdo SQL.
@@ -967,7 +967,7 @@ crontab -e
 Se for a primeira vez, escolha `nano`. Adicione ao final:
 
 ```cron
-0 2 * * * /opt/pcServerName/scripts/backup-postgres.sh >> /opt/pcServerName/backups/postgres/backup.log 2>&1
+0 2 * * * /opt/beta/scripts/backup-postgres.sh >> /opt/beta/backups/postgres/backup.log 2>&1
 ```
 Isso significa:
 
@@ -992,7 +992,7 @@ crontab -l
 Depois da execução do backup, consulte o log:
 
 ```bash
-cat /opt/pcServerName/backups/postgres/backup.log
+cat /opt/beta/backups/postgres/backup.log
 ```
 
 ## Home Lab até agora
@@ -1103,7 +1103,7 @@ pnpm run dev -- -H 0.0.0.0
 
 Depois, abra no navegador do Windows:
 
-[http://192.168.8.10:3000](http://192.168.8.10:3000)
+[http://192.168.0.2:3000](http://192.168.0.2:3000)
 
 ### Testar o Hot Reload
 
