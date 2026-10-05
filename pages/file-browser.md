@@ -79,13 +79,23 @@ Abra no navegador:
 
 ```text
 http://IP_DO_SERVIDOR:8080
+
+Exemplo: 192.168.0.2:8080
 ```
 
-A primeira vez, é normalmente pedido:
+Na primeira vez, o sistema cria conta administrativa. Normalmente para ver usa 
 
-- utilizador
-- password
-- criação da conta administrativa
+
+```bash
+docker compose logs filebrowser
+```
+ou
+```bash
+docker compose logs -f
+```
+
+- user: admin
+- password: ???
 
 ## 7. Primeiros passos úteis
 
@@ -96,37 +106,4 @@ Depois de entrar:
 - use uma conta forte para o acesso web
 - registe o endereço e a porta para facilitar o acesso futuro
 
-## 8. Dicas de uso
-
-- manter a pasta de arquivos em `/home/sousa/files` para organização simples
-- guardar backups e documentos em estruturas claras por categoria
-- limitar acesso a quem realmente precisa de usar o File Browser
-- usar `docker compose logs` se o container não iniciar corretamente
-
-## 9. Verificação rápida
-
-```bash
-docker ps
-```
-
-Se o container aparecer como `Up`, o serviço está a correr corretamente.
-
-## 10. Comandos úteis
-
-```bash
-docker compose logs -f
-
-docker compose down
-docker compose up -d
-```
-
-Use estes comandos para:
-
-- consultar logs
-- reiniciar o serviço
-- parar e voltar a iniciar em caso de alteração de configuração
-
-## 11. Observações
-
-Este serviço é simples, leve e útil para gerir arquivos em casa. Para um ambiente mais robusto, vale a pena combinar com autenticação forte, rede local controlada e backups regulares dos dados importantes.
 
