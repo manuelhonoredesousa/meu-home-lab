@@ -18,6 +18,7 @@ Antes de começar, vale lembrar:
 - [Instalação e configuração do Ubuntu Server](pages/setup.md)
 - [Monitorização do sistema](pages/monitoracao.md)
 - [Terminal e comandos úteis](pages/terminal.md)
+- [Teste de velocidade da internet](pages/speed-cli.md)
 - [Acesso à rede local pelo Tailscale](pages/tailscale-subnet.md)
 - [File Browser](pages/file-browser.md)
 - [Odysseus AI](pages/odysseus.md)
